@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job bot review</title>
+    <style>
+      :root {
+        --ground: #f2f4f6;
+        --paper: #ffffff;
+        --ink: #1f2a33;
+        --muted: #5d6b78;
+        --line: #d9dfe5;
+        --action: #0f6e6e;
+        --action-ink: #ffffff;
+        --applied: #1e7d4b;
+        --needs_manual: #b25e09;
+        --login_required: #5b4fbf;
+        --failed: #b3261e;
+        --skipped: #6b7280;
+        --queued: #0f6e6e;
+        font-family: "Avenir Next", "Segoe UI Variable", "Segoe UI", "Helvetica Neue", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 500;
+        margin: 0 0 6px;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: 19px;
+        font-weight: 500;
+        margin: 40px 0 12px;
+      }
+      p.lede {
+        margin: 0;
+        color: var(--muted);
+        max-width: 70ch;
+      }
+      a {
+        color: var(--action);
+      }
+      button {
+        font: inherit;
+        font-size: 14px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--ink);
+      }
+      button.primary {
+        background: var(--action);
+        border-color: var(--action);
+        color: var(--action-ink);
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--action);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      .queue {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 6px 1fr;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .spine {
+        background: var(--skipped);
+      }
+      .item[data-status="applied"] .spine {
+        background: var(--applied);
+      }
+      .item[data-status="needs_manual"] .spine {
+        background: var(--needs_manual);
+      }
+      .item[data-status="login_required"] .spine {
+        background: var(--login_required);
+      }
+      .item[data-status="failed"] .spine {
+        background: var(--failed);
+      }
+      .body {
+        padding: 14px 18px;
+        display: grid;
+        gap: 8px;
+      }
+      .head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        align-items: baseline;
+      }
+      .title {
+        font-size: 17px;
+        font-weight: 500;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .status {
+        font-size: 13px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        color: #fff;
+        background: var(--skipped);
+      }
+      .status.applied {
+        background: var(--applied);
+      }
+      .status.needs_manual {
+        background: var(--needs_manual);
+      }
+      .status.login_required {
+        background: var(--login_required);
+      }
+      .status.failed {
+        background: var(--failed);
+      }
+      .status.queued {
+        background: var(--queued);
+      }
+      .note {
+        white-space: pre-wrap;
+        color: var(--ink);
+        font-size: 14px;
+      }
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 4px;
+      }
+      .actions input {
+        font: inherit;
+        font-size: 14px;
+        padding: 6px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        min-width: 260px;
+        flex: 1;
+      }
+      img.shot {
+        max-width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-top: 6px;
+      }
+      details summary {
+        cursor: pointer;
+        color: var(--action);
+        font-size: 14px;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .filters button[aria-pressed="true"] {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+      }
+      .tablewrap {
+        overflow-x: auto;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-weight: 500;
+        color: var(--muted);
+        position: sticky;
+        top: 0;
+        background: var(--paper);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td.score {
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        width: 60px;
+      }
+      td.why {
+        color: var(--muted);
+        max-width: 34ch;
+      }
+      .empty {
+        padding: 24px 18px;
+        background: var(--paper);
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .toast {
+          transition: none;
+        }
+      }
+      @media (max-width: 640px) {
+        .actions input {
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Job bot review</h1>
+      <p class="lede" id="summary">Loading…</p>
+
+      <h2>Needs your review</h2>
+      <div class="queue" id="review"></div>
+
+      <h2>Scored jobs</h2>
+      <div class="filters" id="filters">
+        <button data-filter="queued" aria-pressed="true">Queued to apply</button>
+        <button data-filter="eligible" aria-pressed="false">Eligible</button>
+        <button data-filter="applications" aria-pressed="false">With an application</button>
+        <button data-filter="all" aria-pressed="false">All</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Job</th>
+              <th>Source</th>
+              <th>Applicants</th>
+              <th>Rate</th>
+              <th>Eligibility</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="meta" id="rowcount"></p>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      const $ = (s) => document.querySelector(s);
+      const esc = (s) =>
+        String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+        );
+      const STATUS_LABEL = {
+        applied: "Applied",
+        needs_manual: "Needs you",
+        login_required: "Login required",
+        failed: "Failed",
+        skipped: "Skipped",
+      };
+      let filter = "queued";
+      let matches = [];
+      let applications = [];
+
+      function toast(msg) {
+        const t = $("#toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 1800);
+      }
+
+      async function api(path, init) {
+        const res = await fetch(path, init);
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+        return body;
+      }
+
+      async function setStatus(jobId, status, note) {
+        await api(`/api/applications/${encodeURIComponent(jobId)}/status`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ status, note }),
+        });
+        toast(`${STATUS_LABEL[status]} — saved`);
+        await load();
+      }
+
+      function actionButtons(jobId, current) {
+        const choices = [
+          ["applied", "Mark applied", current !== "applied"],
+          ["failed", "Retry next run", current !== "failed" && current !== "applied"],
+          ["skipped", "Skip", current !== "skipped"],
+          ["needs_manual", "Needs me", current !== "needs_manual" && current !== null],
+        ];
+        const id = `note-${jobId.replace(/[^a-z0-9]/gi, "-")}`;
+        return `<div class="actions">
+    <input id="${id}" placeholder="Optional note (e.g. applied on the company site)">
+    ${choices
+      .filter((c) => c[2])
+      .map(
+        ([s, label]) =>
+          `<button data-job="${esc(jobId)}" data-status="${s}" data-note="${id}" class="${s === "applied" ? "primary" : ""}">${label}</button>`,
+      )
+      .join("")}
+  </div>`;
+      }
+
+      function fileLink(p, label) {
+        return p
+          ? `<a href="/api/file?path=${encodeURIComponent(p)}" target="_blank" rel="noopener">${label}</a>`
+          : "";
+      }
+
+      function renderReview() {
+        const open = applications.filter((a) => a.status !== "applied" && a.status !== "skipped");
+        const done = applications.filter((a) => a.status === "applied" || a.status === "skipped");
+        const el = $("#review");
+        if (applications.length === 0) {
+          el.innerHTML = `<div class="empty">No applications yet. Run <code>pnpm jobbot apply</code>, or mark a job below as applied if you applied by hand.</div>`;
+          return;
+        }
+        const item = (a) => `<article class="item" data-status="${esc(a.status)}">
+    <div class="spine"></div>
+    <div class="body">
+      <div class="head">
+        <span class="title">${esc(a.title)}</span>
+        <span class="meta">${esc(a.company)} · ${esc(a.source)}${a.score !== null ? ` · score ${a.score}` : ""}</span>
+        <span class="status ${esc(a.status)}">${STATUS_LABEL[a.status] || esc(a.status)}</span>
+        <span class="meta">${esc(a.at.slice(0, 16).replace("T", " "))}</span>
+      </div>
+      <div class="note">${esc(a.notes)}</div>
+      <div class="links">
+        ${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">Open job page</a>` : ""}
+        ${fileLink(a.coverLetterPath, "Cover letter")}
+        ${a.screenshot ? `<details><summary>Screenshot</summary><img class="shot" loading="lazy" src="/api/file?path=${encodeURIComponent(a.screenshot)}" alt="Screenshot of the application page"></details>` : ""}
+      </div>
+      ${actionButtons(a.jobId, a.status)}
+    </div>
+  </article>`;
+        el.innerHTML =
+          (open.length
+            ? open.map(item).join("")
+            : `<div class="empty">Nothing waiting on you.</div>`) +
+          (done.length
+            ? `<details><summary>${done.length} finished (applied or skipped)</summary><div class="queue" style="margin-top:10px">${done.map(item).join("")}</div></details>`
+            : "");
+      }
+
+      function renderRows() {
+        const rows = matches.filter((m) => {
+          if (filter === "queued")
+            return (
+              m.qualifies &&
+              (m.applicationStatus === null ||
+                m.applicationStatus === "failed" ||
+                m.applicationStatus === "login_required")
+            );
+          if (filter === "eligible") return m.eligible;
+          if (filter === "applications") return m.applicationStatus !== null;
+          return true;
+        });
+        $("#rows").innerHTML = rows
+          .map((m) => {
+            const status = m.applicationStatus
+              ? `<span class="status ${esc(m.applicationStatus)}">${STATUS_LABEL[m.applicationStatus]}</span>`
+              : m.qualifies
+                ? `<span class="status queued">Queued</span>`
+                : `<span class="meta">not queued</span>`;
+            const why = m.eligible
+              ? m.qualifies
+                ? ""
+                : [
+                    m.rateCheck === "fail" ? "pay below floor" : "",
+                    !m.employmentTypeOk ? "employment type" : "",
+                    !m.workModeOk ? "work mode" : "",
+                    m.score < currentMin ? `score below ${currentMin}` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
+              : m.eligibilityReason;
+            const rate =
+              m.rateCheck +
+              (m.estimatedHourlyUsd ? ` ($${Math.round(m.estimatedHourlyUsd)}/h)` : "");
+            return `<tr>
+      <td class="score">${m.score}</td>
+      <td><a href="${esc(m.applyUrl || m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a><div class="meta">${esc(m.company)} · ${esc(m.location)}</div></td>
+      <td>${esc(m.source)}</td>
+      <td>${m.applicants ?? "?"}</td>
+      <td>${esc(rate)}</td>
+      <td class="why">${m.eligible ? "eligible" : "ineligible"}${why ? ` — ${esc(why)}` : ""}</td>
+      <td>${status}</td>
+      <td>${m.applicationStatus === null ? `<button data-job="${esc(m.jobId)}" data-status="applied" title="I applied to this by hand">Mark applied</button> <button data-job="${esc(m.jobId)}" data-status="skipped">Skip</button>` : ""}</td>
+    </tr>`;
+          })
+          .join("");
+        $("#rowcount").textContent = `${rows.length} of ${matches.length} scored jobs`;
+      }
+
+      let currentMin = 70;
+      async function load() {
+        const [summary, m, a] = await Promise.all([
+          api("/api/summary"),
+          api("/api/matches"),
+          api("/api/applications"),
+        ]);
+        currentMin = summary.minScore;
+        matches = m;
+        applications = a;
+        $("#summary").textContent =
+          `${summary.jobs} jobs seen, ${summary.rejected} filtered out, ${summary.matched} scored, ${summary.queued} queued to apply at score ${summary.minScore} or better, ${summary.applications} applications.`;
+        renderReview();
+        renderRows();
+      }
+
+      document.addEventListener("click", async (e) => {
+        const b = e.target.closest("button[data-status]");
+        if (b) {
+          const noteEl = b.dataset.note ? document.getElementById(b.dataset.note) : null;
+          b.disabled = true;
+          try {
+            await setStatus(b.dataset.job, b.dataset.status, noteEl ? noteEl.value : "");
+          } catch (err) {
+            toast(err.message);
+            b.disabled = false;
+          }
+          return;
+        }
+        const f = e.target.closest("#filters button");
+        if (f) {
+          filter = f.dataset.filter;
+          for (const x of document.querySelectorAll("#filters button"))
+            x.setAttribute("aria-pressed", String(x === f));
+          renderRows();
+        }
+      });
+
+      load().catch((err) => {
+        $("#summary").textContent = `Could not load data: ${err.message}`;
+      });
+    </script>
+  </body>
+</html>

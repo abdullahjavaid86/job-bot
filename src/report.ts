@@ -1,54 +1,40 @@
 import type { StateStore } from "./store/state.ts";
 
-export function renderReport(store: StateStore): string {
-  const { jobs, matches, applications, rejected } = store.state;
+export function renderReport(store: StateStore, minScore: number): string {
   const lines: string[] = [];
-  const bySource = new Map<string, number>();
-  for (const j of Object.values(jobs)) bySource.set(j.source, (bySource.get(j.source) ?? 0) + 1);
-
   lines.push("# Job bot report", "");
   lines.push(
-    `Jobs seen: ${Object.keys(jobs).length}  |  prefiltered out: ${Object.keys(rejected).length}  |  matched: ${Object.keys(matches).length}  |  applications: ${Object.keys(applications).length}`,
+    `Jobs seen: ${store.countJobs()}  |  prefiltered out: ${store.countRejected()}  |  matched: ${store.countMatches()}  |  queued to apply (score ≥ ${minScore}): ${store.pendingApplications(minScore).length}  |  applications: ${store.countApplications()}`,
   );
   lines.push("", "## Jobs by source", "");
-  for (const [s, n] of [...bySource.entries()].toSorted((a, b) => b[1] - a[1]))
-    lines.push(`- ${s}: ${n}`);
+  for (const { source, n } of store.jobsBySource()) lines.push(`- ${source}: ${n}`);
 
-  const top = Object.values(matches)
-    .toSorted((a, b) => b.score - a.score)
-    .slice(0, 25);
   lines.push(
     "",
     "## Top matches",
     "",
-    "| score | rec | eligible | rate | job | applicants | url |",
+    "| score | apply? | eligible | rate | job | applicants | url |",
     "|---|---|---|---|---|---|---|",
   );
-  for (const m of top) {
-    const j = jobs[m.jobId];
-    if (!j) continue;
+  for (const m of store.listMatches(minScore).slice(0, 25)) {
+    const rate = `${m.rateCheck}${m.estimatedHourlyUsd ? ` ($${m.estimatedHourlyUsd.toFixed(0)}/h)` : ""}`;
+    const why = m.eligible ? "yes" : `no: ${m.eligibilityReason.slice(0, 60)}`;
     lines.push(
-      `| ${m.score} | ${m.recommendation} | ${m.eligible ? "yes" : "no"} | ${m.rateCheck}${m.estimatedHourlyUsd ? ` ($${m.estimatedHourlyUsd.toFixed(0)}/h)` : ""} | ${j.title} @ ${j.company} (${j.source}) | ${j.applicants ?? "?"} | ${j.url} |`,
+      `| ${m.score} | ${m.qualifies ? "yes" : "no"} | ${why} | ${rate} | ${m.title} @ ${m.company} (${m.source}) | ${m.applicants ?? "?"} | ${m.url} |`,
     );
   }
 
-  const apps = Object.values(applications).toSorted((a, b) => b.at.localeCompare(a.at));
+  const apps = store.listApplications();
   lines.push("", "## Applications", "");
   if (apps.length === 0) lines.push("_none yet_");
   for (const a of apps) {
-    const j = jobs[a.jobId];
+    const j = store.getJob(a.jobId);
     lines.push(
       `- **${a.status}** — ${j ? `${j.title} @ ${j.company}` : a.jobId} (${a.at.slice(0, 16)})  \n  ${a.notes}${a.screenshot ? `  \n  screenshot: ${a.screenshot}` : ""}`,
     );
   }
 
-  const reasons = new Map<string, number>();
-  for (const r of Object.values(rejected)) {
-    const key = r.replace(/\d+/g, "N");
-    reasons.set(key, (reasons.get(key) ?? 0) + 1);
-  }
   lines.push("", "## Prefilter rejections", "");
-  for (const [r, n] of [...reasons.entries()].toSorted((a, b) => b[1] - a[1]).slice(0, 15))
-    lines.push(`- ${r}: ${n}`);
+  for (const { reason, n } of store.rejectionReasons()) lines.push(`- ${reason}: ${n}`);
   return lines.join("\n");
 }

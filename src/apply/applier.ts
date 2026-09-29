@@ -117,9 +117,9 @@ export async function applyToJob(
         base.screenshot = await screenshot(page, shotDir, `${slug(job.id)}-login`);
         return {
           ...base,
-          status: "needs_manual",
+          status: "login_required",
           at: now(),
-          notes: `Login required at ${inv.url}. Sign in inside the bot's browser window (data/browser-profile) and re-run apply.`,
+          notes: `Login required at ${inv.url}. Sign in inside the bot's browser window, then run apply again; this job will be retried.`,
         };
       }
       if (plan.pageState === "blocked") {
@@ -179,7 +179,7 @@ export async function applyToJob(
       page = await clickButton(page, plan.nextButtonId);
       await page.waitForTimeout(2000);
       if (plan.nextButtonIsFinalSubmit) {
-        const text = await page.evaluate(() => document.body.innerText).catch(() => "");
+        const text = await page.evaluate(() => document.body?.innerText ?? "").catch(() => "");
         base.screenshot = await screenshot(page, shotDir, `${slug(job.id)}-after-submit`);
         if (SUCCESS_RE.test(text))
           return {

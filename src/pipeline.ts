@@ -9,15 +9,10 @@ import type { LLM } from "./llm/types.ts";
 import { log } from "./log.ts";
 import { applyToJob } from "./apply/applier.ts";
 import { matchJobs } from "./match/matcher.ts";
-import {
-  extractProfile,
-  findCv,
-  inputsHash,
-  readInstructions,
-} from "./profile/extract.ts";
+import { extractProfile, findCv, inputsHash, readInstructions } from "./profile/extract.ts";
 import { selectSources } from "./sources/index.ts";
 import { StateStore } from "./store/state.ts";
-import { Criteria, Profile, type Job } from "./types.ts";
+import { Criteria, DEFAULT_CRITERIA, Profile, type Job } from "./types.ts";
 import type { JobSource, SearchContext } from "./sources/types.ts";
 
 export interface Runtime {
@@ -41,9 +36,15 @@ function profilePaths(dataDir: string) {
   };
 }
 
-function loadProfile(
-  dataDir: string,
-): { profile: Profile; criteria: Criteria } | null {
+/** Criteria as last extracted (data/criteria.json, editable by hand), or the defaults. */
+export function loadCriteria(dataDir: string): Criteria {
+  const file = profilePaths(dataDir).criteria;
+  return fs.existsSync(file)
+    ? Criteria.parse(JSON.parse(fs.readFileSync(file, "utf8")))
+    : DEFAULT_CRITERIA;
+}
+
+function loadProfile(dataDir: string): { profile: Profile; criteria: Criteria } | null {
   const p = profilePaths(dataDir);
   if (!fs.existsSync(p.profile) || !fs.existsSync(p.criteria)) return null;
   return {
@@ -57,16 +58,13 @@ export async function ensureProfile(
   force = false,
 ): Promise<{ profile: Profile; criteria: Criteria; cvPath: string }> {
   const cvPath = findCv(process.cwd());
-  if (!cvPath)
-    throw new Error("No CV found. Put your CV at ./cv.pdf or ./resume.pdf");
+  if (!cvPath) throw new Error("No CV found. Put your CV at ./cv.pdf or ./resume.pdf");
   const cvBytes = fs.readFileSync(cvPath);
   const instructions = readInstructions(rt.config.instructionsPath);
   const hash = inputsHash(cvBytes, instructions);
   const cached = loadProfile(rt.config.dataDir);
-  if (!force && cached && rt.store.state.profileHash === hash) {
-    log.info(
-      `profile: using cached profile for ${cached.profile.fullName} (data/profile.json)`,
-    );
+  if (!force && cached && rt.store.getProfileHash() === hash) {
+    log.info(`profile: using cached profile for ${cached.profile.fullName} (data/profile.json)`);
     return { ...cached, cvPath };
   }
   log.info(
@@ -81,14 +79,11 @@ export async function ensureProfile(
   const p = profilePaths(rt.config.dataDir);
   fs.writeFileSync(p.profile, JSON.stringify(profile, null, 2));
   fs.writeFileSync(p.criteria, JSON.stringify(criteria, null, 2));
-  rt.store.state.profileHash = hash;
-  rt.store.save();
+  rt.store.setProfileHash(hash);
   log.info(
     `profile: ${profile.fullName} — ${profile.headline}; keywords: ${profile.searchKeywords.join(", ")}`,
   );
-  log.info(
-    `criteria: ${JSON.stringify({ ...criteria, extraInstructions: undefined })}`,
-  );
+  log.info(`criteria: ${JSON.stringify({ ...criteria, extraInstructions: undefined })}`);
   return { profile, criteria, cvPath };
 }
 
@@ -119,17 +114,16 @@ export async function search(
   criteria: Criteria,
   opts: SearchOptions,
 ): Promise<Job[]> {
-  const keywords = (
-    criteria.keywords.length ? criteria.keywords : profile.searchKeywords
-  ).slice(0, 8);
+  const keywords = (criteria.keywords.length ? criteria.keywords : profile.searchKeywords).slice(
+    0,
+    8,
+  );
   const sources = selectSources(
     opts.sources,
     { dataDir: rt.config.dataDir, headless: rt.config.headless },
     opts.includeBrowser,
   );
-  log.info(
-    `search: ${sources.map((s) => s.name).join(", ")} for [${keywords.join(", ")}]`,
-  );
+  log.info(`search: ${sources.map((s) => s.name).join(", ")} for [${keywords.join(", ")}]`);
   const found: Job[] = [];
   const httpRuns = sources
     .filter((s) => !s.needsBrowser)
@@ -151,7 +145,6 @@ export async function search(
     found.push(...jobs);
   }
   const { added } = rt.store.upsertJobs(found);
-  rt.store.save();
   log.info(`search: ${found.length} jobs fetched, ${added} new`);
   return found;
 }
@@ -162,15 +155,9 @@ export async function match(
   criteria: Criteria,
   maxJobs?: number,
 ): Promise<number> {
-  const candidates = Object.values(rt.store.state.jobs).filter(
-    (j) =>
-      !rt.store.state.matches[j.id] &&
-      !rt.store.isRejected(j.id) &&
-      !rt.store.hasBeenApplied(j.id),
-  );
+  const candidates = rt.store.unscoredJobs();
   const { keep, rejected } = prefilter(candidates, criteria);
   for (const r of rejected) rt.store.reject(r.job.id, r.reason);
-  rt.store.save();
   const toMatch = keep
     .toSorted((a, b) => (b.postedAt ?? "").localeCompare(a.postedAt ?? ""))
     .slice(0, maxJobs ?? criteria.maxJobsToMatch);
@@ -178,22 +165,14 @@ export async function match(
     `match: ${candidates.length} unscored → ${rejected.length} prefiltered out → scoring ${toMatch.length} with ${rt.config.model}`,
   );
   let applyCount = 0;
-  await matchJobs(
-    rt.llm,
-    profile,
-    criteria,
-    toMatch,
-    { model: rt.config.model },
-    (m) => {
-      rt.store.setMatch(m);
-      rt.store.save();
-      const j = rt.store.state.jobs[m.jobId]!;
-      if (m.recommendation === "apply") applyCount++;
-      log.info(
-        `  ${String(m.score).padStart(3)} ${m.recommendation.padEnd(5)} ${j.title} @ ${j.company} [${j.source}] ${m.eligible ? "" : "(ineligible: " + m.eligibilityReason + ")"}`,
-      );
-    },
-  );
+  await matchJobs(rt.llm, profile, criteria, toMatch, { model: rt.config.model }, (m) => {
+    rt.store.setMatch(m);
+    const j = rt.store.getJob(m.jobId)!;
+    if (m.recommendation === "apply") applyCount++;
+    log.info(
+      `  ${String(m.score).padStart(3)} ${m.recommendation.padEnd(5)} ${j.title} @ ${j.company} [${j.source}] ${m.eligible ? "" : "(ineligible: " + m.eligibilityReason + ")"}`,
+    );
+  });
   log.info(`match: ${applyCount} recommended to apply`);
   return applyCount;
 }
@@ -221,9 +200,7 @@ export async function apply(
     `apply: ${pending.length} job(s), mode=${opts.auto ? "AUTO SUBMIT" : "review (stops before submit)"}`,
   );
   for (const job of pending) {
-    log.info(
-      `apply: ${job.title} @ ${job.company} — ${job.applyUrl ?? job.url}`,
-    );
+    log.info(`apply: ${job.title} @ ${job.company} — ${job.applyUrl ?? job.url}`);
     const rec = await applyToJob(rt.llm, profile, criteria, job, {
       model: rt.config.model,
       dataDir: rt.config.dataDir,
@@ -232,19 +209,12 @@ export async function apply(
       auto: opts.auto,
     });
     rt.store.recordApplication(rec);
-    rt.store.save();
     log.info(`  → ${rec.status}: ${rec.notes}`);
   }
-  const open = Object.values(rt.store.state.applications).filter(
-    (a) => a.status === "needs_manual",
-  ).length;
+  const open = rt.store.countApplications("needs_manual");
   if (!opts.auto && open > 0 && process.stdin.isTTY && !rt.config.headless) {
-    log.info(
-      `apply: ${open} tab(s) left open for your review. Press Enter to close the browser.`,
-    );
-    await new Promise<void>((resolve) =>
-      process.stdin.once("data", () => resolve()),
-    );
+    log.info(`apply: ${open} tab(s) left open for your review. Press Enter to close the browser.`);
+    await new Promise<void>((resolve) => process.stdin.once("data", () => resolve()));
   }
   await closeBrowser();
 }

@@ -123,10 +123,16 @@ export const MatchResult = z.object({
 });
 export type MatchResult = z.infer<typeof MatchResult>;
 
-const ApplicationStatus = z.enum(["applied", "needs_manual", "failed", "skipped"]);
-// export type ApplicationStatus = z.infer<typeof ApplicationStatus>;
+export const ApplicationStatus = z.enum([
+  "applied",
+  "needs_manual",
+  "login_required",
+  "failed",
+  "skipped",
+]);
+export type ApplicationStatus = z.infer<typeof ApplicationStatus>;
 
-const ApplicationRecord = z.object({
+export const ApplicationRecord = z.object({
   jobId: z.string(),
   status: ApplicationStatus,
   at: z.string(),
@@ -136,12 +142,3 @@ const ApplicationRecord = z.object({
   coverLetterPath: z.string().nullable(),
 });
 export type ApplicationRecord = z.infer<typeof ApplicationRecord>;
-
-export const State = z.object({
-  profileHash: z.string().nullable(),
-  jobs: z.record(z.string(), Job),
-  matches: z.record(z.string(), MatchResult),
-  applications: z.record(z.string(), ApplicationRecord),
-  rejected: z.record(z.string(), z.string()).describe("jobId -> prefilter reason"),
-});
-export type State = z.infer<typeof State>;

@@ -21,7 +21,8 @@ What it does end to end:
    every field to a truthful answer from your profile, uploads your CV, writes a tailored cover
    letter, and walks through multi-step forms. By default it **stops before the final submit**
    so you can review; `--auto` submits.
-6. **Report** – everything is tracked in `data/state.json` and summarised in `data/report.md`.
+6. **Report** – everything is tracked in a SQLite database (`data/jobbot.sqlite`) and summarised
+   in `data/report.md`.
 
 ## Setup
 
@@ -124,20 +125,51 @@ automated browsers. The bot waits up to 90 seconds for you to solve it in the wi
 is a vetted network, not an open board. LinkedIn's and Indeed's terms of service prohibit
 automation; use `--browser` and LinkedIn applying at your own risk of account restrictions.
 
+## Dashboard
+
+```bash
+pnpm jobbot dashboard            # http://127.0.0.1:4310
+```
+
+A local page (no build, no external assets, bound to localhost) with two parts:
+
+- **Needs your review** – every application the bot could not finish (`needs_manual`,
+  `login_required`, `failed`), with the bot's note, the job link, the cover letter, and the
+  screenshot. Buttons change the status: _Mark applied_ (you finished it by hand), _Retry next
+  run_ (sets `failed`, so the next `apply` tries again), _Skip_, _Needs me_. An optional note
+  is appended to the record.
+- **Scored jobs** – every verdict with score, eligibility reason, rate check, applicant count,
+  and whether it currently qualifies for an application at your `minMatchScore`. Filters:
+  queued, eligible, with an application, all. _Mark applied_ / _Skip_ on any row records a
+  manual application so the bot will not apply to it.
+
+The apply/skip decision is computed from the stored verdict fields against the **current**
+`minMatchScore` in `data/criteria.json`, so lowering the threshold re-qualifies jobs that were
+scored earlier without re-running the model.
+
 ## Data
 
 ```
 data/
   profile.json      structured profile extracted from your CV
   criteria.json     search criteria (edit by hand if you like)
-  state.json        all jobs seen, prefilter rejections, match scores, applications
+  jobbot.sqlite     all jobs seen, prefilter rejections, match verdicts, applications
+                    (tables: jobs, matches, applications, rejected, meta; open it with any SQLite client)
   cover-letters/    one tailored cover letter per application
   screenshots/      review / submitted / error screenshots
   report.md         latest summary
   browser-profile/  persistent Chromium profile (your logins)
 ```
 
-Delete `data/state.json` to start fresh (the bot will re-see and possibly re-match every job).
+Delete `data/jobbot.sqlite` to start fresh (the bot will re-see and re-match every job). The
+database uses Node's built-in `node:sqlite`, so there is nothing extra to install.
+
+Handy queries:
+
+```bash
+sqlite3 data/jobbot.sqlite "select score, recommendation, title, company from matches join jobs on jobs.id = job_id order by score desc limit 20"
+sqlite3 data/jobbot.sqlite "select status, count(*) from applications group by status"
+```
 
 ## Development
 

@@ -4,9 +4,10 @@ import type { LLM } from "../llm/types.ts";
 import { log } from "../log.ts";
 import { MatchResult, type Criteria, type Job, type Profile } from "../types.ts";
 
-const Verdict = MatchResult.omit({ jobId: true });
+/** What the model returns; the apply/skip decision is made in code, not by the model. */
+const Verdict = MatchResult.omit({ jobId: true, recommendation: true });
 
-const SYSTEM = `You are a meticulous recruiting analyst deciding whether a candidate should apply to a job. You are given the candidate's profile and criteria (cached context) and one job posting.
+const SYSTEM = `You are a meticulous recruiting analyst assessing whether a candidate fits a job. You are given the candidate's profile and criteria (cached context) and one job posting.
 
 Scoring (0-100): how well the candidate's real skills and experience fit the posting's requirements. 85+ = strong fit, 70-84 = good fit worth applying, 50-69 = partial, below 50 = poor. Be honest; do not inflate.
 
@@ -16,12 +17,11 @@ rateCheck: "pass" if stated or clearly implied pay is at or above criteria.minHo
 
 employmentTypeOk / workModeOk: whether the posting's type and mode are within the criteria lists (treat unstated as ok).
 
-recommendation: "apply" only when eligible, rateCheck is not "fail", employmentTypeOk, workModeOk, and score >= criteria.minMatchScore. Otherwise "skip".
-
 strengths / gaps: 2-5 short bullets each, concrete, referencing the posting's requirements.`;
 
 export interface MatchOptions {
   model: string;
+  minMatchScore: number;
   concurrency?: number;
 }
 
@@ -29,7 +29,24 @@ export function buildContext(profile: Profile, criteria: Criteria): string {
   return `CANDIDATE PROFILE\n${JSON.stringify(profile, null, 2)}\n\nCRITERIA\n${JSON.stringify(criteria, null, 2)}`;
 }
 
-async function matchJob(
+/**
+ * The apply rule. Kept in code so that changing minMatchScore in criteria.json re-qualifies
+ * already-scored jobs; the same rule is expressed in SQL in StateStore.pendingApplications.
+ */
+export function decideRecommendation(
+  v: Pick<MatchResult, "score" | "eligible" | "rateCheck" | "employmentTypeOk" | "workModeOk">,
+  minMatchScore: number,
+): MatchResult["recommendation"] {
+  return v.eligible &&
+    v.rateCheck !== "fail" &&
+    v.employmentTypeOk &&
+    v.workModeOk &&
+    v.score >= minMatchScore
+    ? "apply"
+    : "skip";
+}
+
+export async function matchJob(
   llm: LLM,
   cached: string,
   job: Job,
@@ -45,7 +62,11 @@ async function matchJob(
     effort: "medium",
     maxTokens: 4_000,
   });
-  return { jobId: job.id, ...verdict };
+  return {
+    jobId: job.id,
+    ...verdict,
+    recommendation: decideRecommendation(verdict, opts.minMatchScore),
+  };
 }
 
 export async function matchJobs(
@@ -53,16 +74,20 @@ export async function matchJobs(
   profile: Profile,
   criteria: Criteria,
   jobs: Job[],
-  opts: MatchOptions,
+  opts: Omit<MatchOptions, "minMatchScore"> & { minMatchScore?: number },
   onResult?: (m: MatchResult) => void,
 ): Promise<MatchResult[]> {
   const cached = buildContext(profile, criteria);
   const limit = pLimit(opts.concurrency ?? llm.concurrency);
+  const full: MatchOptions = {
+    ...opts,
+    minMatchScore: opts.minMatchScore ?? criteria.minMatchScore,
+  };
   const results = await Promise.all(
     jobs.map((job) =>
       limit(async () => {
         try {
-          const m = await matchJob(llm, cached, job, opts);
+          const m = await matchJob(llm, cached, job, full);
           onResult?.(m);
           return m;
         } catch (err) {

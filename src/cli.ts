@@ -6,8 +6,10 @@ import { Command } from "commander";
 import { closeBrowser } from "./browser.ts";
 import { DEFAULT_MODEL, loadConfig, loadDotenv, parseProvider } from "./config.ts";
 import { log } from "./log.ts";
-import { apply, createRuntime, ensureProfile, match, search } from "./pipeline.ts";
+import { startDashboard } from "./dashboard/server.ts";
+import { apply, createRuntime, ensureProfile, loadCriteria, match, search } from "./pipeline.ts";
 import { renderReport } from "./report.ts";
+import { StateStore } from "./store/state.ts";
 
 const splitList = (v: string) =>
   v
@@ -57,7 +59,7 @@ async function main(): Promise<void> {
 
   program
     .command("search")
-    .description("Fetch jobs from the portals into data/state.json")
+    .description("Fetch jobs from the portals into data/jobbot.sqlite")
     .option("-s, --sources <list>", "comma-separated sources (default: all)", splitList)
     .option("--browser", "also run browser-based sources (indeed, toptal)", false)
     .option("--limit <n>", "max jobs per source", (v) => Number.parseInt(v, 10), 100)
@@ -128,7 +130,7 @@ async function main(): Promise<void> {
             ...(o.max !== undefined ? { max: o.max } : {}),
           });
         else await closeBrowser();
-        const report = renderReport(rt.store);
+        const report = renderReport(rt.store, criteria.minMatchScore);
         fs.writeFileSync(path.join(config.dataDir, "report.md"), report);
         console.log(`\n${report}`);
       },
@@ -139,9 +141,27 @@ async function main(): Promise<void> {
     .description("Print a summary of jobs, matches, and applications")
     .action(() => {
       const rt = createRuntime(config);
-      const report = renderReport(rt.store);
+      const report = renderReport(rt.store, loadCriteria(config.dataDir).minMatchScore);
       fs.writeFileSync(path.join(config.dataDir, "report.md"), report);
       console.log(report);
+    });
+
+  program
+    .command("dashboard")
+    .description("Local web dashboard to browse scored jobs and change application statuses")
+    .option("--port <n>", "port on 127.0.0.1", (v) => Number.parseInt(v, 10), 4310)
+    .action(async (o: { port: number }) => {
+      const store = new StateStore(config.dataDir);
+      const server = await startDashboard({
+        store,
+        dataDir: config.dataDir,
+        minScore: () => loadCriteria(config.dataDir).minMatchScore,
+        port: o.port,
+      });
+      log.info(`dashboard: http://127.0.0.1:${server.port}  (Ctrl+C to stop)`);
+      await new Promise<void>((resolve) => process.once("SIGINT", () => resolve()));
+      server.close();
+      store.close();
     });
 
   await program.parseAsync(process.argv);

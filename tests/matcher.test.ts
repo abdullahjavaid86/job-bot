@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { LLM } from "../src/llm/types.ts";
-import { buildContext, matchJobs, type Verdict } from "../src/match/matcher.ts";
+import {
+  buildContext,
+  decideRecommendation,
+  matchJobs,
+  type Verdict,
+} from "../src/match/matcher.ts";
 import { DEFAULT_CRITERIA, type Profile } from "../src/types.ts";
 import { job } from "./helpers.ts";
 
@@ -36,8 +41,20 @@ const verdict = (over: Partial<Verdict> = {}): Verdict => ({
   workModeOk: true,
   strengths: ["React"],
   gaps: [],
-  recommendation: "apply",
   ...over,
+});
+
+describe("decideRecommendation", () => {
+  it("applies only when every gate passes at the current threshold", () => {
+    expect(decideRecommendation(verdict(), 70)).toBe("apply");
+    expect(decideRecommendation(verdict({ score: 69 }), 70)).toBe("skip");
+    expect(decideRecommendation(verdict({ score: 69 }), 60)).toBe("apply");
+    expect(decideRecommendation(verdict({ eligible: false }), 70)).toBe("skip");
+    expect(decideRecommendation(verdict({ rateCheck: "fail" }), 70)).toBe("skip");
+    expect(decideRecommendation(verdict({ rateCheck: "pass" }), 70)).toBe("apply");
+    expect(decideRecommendation(verdict({ employmentTypeOk: false }), 70)).toBe("skip");
+    expect(decideRecommendation(verdict({ workModeOk: false }), 70)).toBe("skip");
+  });
 });
 
 describe("matchJobs", () => {
@@ -52,6 +69,7 @@ describe("matchJobs", () => {
       seen.push(m.jobId),
     );
     expect(results.map((r) => r.jobId).toSorted()).toEqual(["a", "b"]);
+    expect(results.every((r) => r.recommendation === "apply")).toBe(true);
     expect(seen.toSorted()).toEqual(["a", "b"]);
     const call = structured.mock.calls[0]![0] as {
       cachedContext: string;
@@ -70,7 +88,7 @@ describe("matchJobs", () => {
       structured: async () => {
         n++;
         if (n === 1) throw new Error("boom");
-        return verdict({ score: 55, recommendation: "skip" });
+        return verdict({ score: 55 });
       },
     } as unknown as LLM;
     const results = await matchJobs(

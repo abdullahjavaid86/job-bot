@@ -7,14 +7,7 @@ import { z } from "zod";
 
 export interface FieldInfo {
   id: string;
-  kind:
-    | "text"
-    | "textarea"
-    | "select"
-    | "checkbox"
-    | "radio"
-    | "file"
-    | "combobox";
+  kind: "text" | "textarea" | "select" | "checkbox" | "radio" | "file" | "combobox";
   label: string;
   name: string;
   placeholder: string;
@@ -47,16 +40,10 @@ export async function inventory(page: Page): Promise<PageInventory> {
     const visible = (el: Element) => {
       const r = el.getBoundingClientRect();
       const st = getComputedStyle(el);
-      return (
-        r.width > 0 &&
-        r.height > 0 &&
-        st.visibility !== "hidden" &&
-        st.display !== "none"
-      );
+      return r.width > 0 && r.height > 0 && st.visibility !== "hidden" && st.display !== "none";
     };
     // oxlint-disable-next-line unicorn/consistent-function-scoping -- serialized into the page
-    const txt = (el: Element | null) =>
-      (el?.textContent ?? "").replace(/\s+/g, " ").trim();
+    const txt = (el: Element | null) => (el?.textContent ?? "").replace(/\s+/g, " ").trim();
     const labelFor = (el: HTMLElement): string => {
       const id = el.getAttribute("id");
       if (id) {
@@ -104,11 +91,7 @@ export async function inventory(page: Page): Promise<PageInventory> {
       "input:not([type=hidden]):not([type=submit]):not([type=button]), textarea, select, [role=combobox], [contenteditable=true]",
     );
     for (const el of inputs) {
-      if (
-        !visible(el) &&
-        !(el instanceof HTMLInputElement && el.type === "file")
-      )
-        continue;
+      if (!visible(el) && !(el instanceof HTMLInputElement && el.type === "file")) continue;
       if ((el as HTMLInputElement).disabled) continue;
       const tagName = el.tagName.toLowerCase();
       let kind: FieldInfo["kind"] = "text";
@@ -166,9 +149,7 @@ export async function inventory(page: Page): Promise<PageInventory> {
         label: labelFor(el),
         name: el.getAttribute("name") ?? "",
         placeholder: el.getAttribute("placeholder") ?? "",
-        required:
-          el.hasAttribute("required") ||
-          el.getAttribute("aria-required") === "true",
+        required: el.hasAttribute("required") || el.getAttribute("aria-required") === "true",
         value,
         options,
       });
@@ -198,9 +179,7 @@ export async function inventory(page: Page): Promise<PageInventory> {
       title: document.title,
       fields,
       buttons,
-      bodyText: (document.body.innerText ?? "")
-        .replace(/\s+/g, " ")
-        .slice(0, 4000),
+      bodyText: (document.body?.innerText ?? "").replace(/\s+/g, " ").slice(0, 4000),
     };
   }, ATTR);
 }
@@ -218,9 +197,7 @@ const FieldAction = z.object({
   ]),
   value: z
     .string()
-    .describe(
-      "Text to type or exact option label to select; empty for check/upload/skip",
-    ),
+    .describe("Text to type or exact option label to select; empty for check/upload/skip"),
 });
 
 const FormPlan = z.object({
@@ -234,10 +211,7 @@ const FormPlan = z.object({
     "blocked",
   ]),
   fieldActions: z.array(FieldAction),
-  nextButtonId: z
-    .string()
-    .nullable()
-    .describe("Button to click after filling; null if none"),
+  nextButtonId: z.string().nullable().describe("Button to click after filling; null if none"),
   nextButtonIsFinalSubmit: z.boolean(),
   unanswered: z
     .array(z.string())
@@ -329,9 +303,7 @@ export async function executeActions(
         case "fill":
           if (field.kind === "combobox") {
             await loc.click(T);
-            await loc
-              .fill(a.value, T)
-              .catch(() => loc.pressSequentially(a.value, T));
+            await loc.fill(a.value, T).catch(() => loc.pressSequentially(a.value, T));
             await page.waitForTimeout(600);
             findAndClick();
           } else if (
@@ -339,26 +311,18 @@ export async function executeActions(
             !(await loc.evaluate((e) => e instanceof HTMLTextAreaElement))
           ) {
             await loc.click(T);
-            await loc
-              .fill(a.value, T)
-              .catch(() => loc.pressSequentially(a.value, T));
+            await loc.fill(a.value, T).catch(() => loc.pressSequentially(a.value, T));
           } else {
             await loc.fill(a.value, T);
           }
           break;
         case "select":
           if (field.kind === "select") {
-            await loc
-              .selectOption({ label: a.value }, T)
-              .catch(() => loc.selectOption(a.value, T));
+            await loc.selectOption({ label: a.value }, T).catch(() => loc.selectOption(a.value, T));
           } else if (field.kind === "radio") {
-            const idx = field.options.findIndex(
-              (o) => o.toLowerCase() === a.value.toLowerCase(),
-            );
+            const idx = field.options.findIndex((o) => o.toLowerCase() === a.value.toLowerCase());
             const radios = field.name
-              ? page.locator(
-                  `input[type=radio][name="${field.name.replace(/"/g, '\\"')}"]`,
-                )
+              ? page.locator(`input[type=radio][name="${field.name.replace(/"/g, '\\"')}"]`)
               : loc;
             if (idx >= 0) await radios.nth(idx).check({ force: true, ...T });
             else await radios.first().check({ force: true, ...T });
