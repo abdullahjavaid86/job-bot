@@ -1,0 +1,39 @@
+{
+  "name": "job-application-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI agent that reads your CV, finds remote jobs across portals, scores them with Claude, and applies.",
+  "bin": {
+    "jobbot": "./src/cli.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "jobbot": "node src/cli.ts",
+    "jobbot:local": "pnpm jobbot run --provider ollama --model qwen3:8b",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src tests",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.128.0",
+    "commander": "15.0.0",
+    "fast-xml-parser": "5.11.1",
+    "p-limit": "7.3.3",
+    "pdf-parse": "2.4.5",
+    "playwright": "1.63.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.3",
+    "oxfmt": "0.71.0",
+    "oxlint": "1.86.0",
+    "typescript": "5.9.3",
+    "vitest": "5.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

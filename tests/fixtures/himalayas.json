@@ -1,0 +1,102 @@
+{
+  "comments": "21/08/2026: Cursor pagination is now available and is the preferred way to page through the feed. Pass the nextCursor value from each response back as ?cursor=. It is faster than offset and will never return the same job twice. The offset parameter is deprecated and will be removed in a future release. 13/03/2026: The API has been updated to include the companySlug field in the response.",
+  "updatedAt": 1790584284,
+  "offset": 0,
+  "limit": 5,
+  "totalCount": 97420,
+  "nextCursor": "MjAyNi0wOS0yOFQwNDo1Mzo1Ni41NTAyODdafDIyOTM3OTA",
+  "jobs": [
+    {
+      "title": "Paid Social Manager (Meta Ads) \u2014 Remote",
+      "excerpt": "What you'll do\u2022 Set up and launch Meta Ads (Facebook/Instagram) campaigns for agency clients \u2022 Daily monitoring of ad accounts: budgets, statuses, flags/bans, account health checks \u2022 Manage and optimize live campaigns \u2014 testing audiences, offers, and creatives \u2022 Run multiple client accounts simultaneously \u2022 Report and analyze performance metrics: CPL, CQL, CAC, CTR, CPM \u2022 Brief designers/copywriters on creatives, and independently edit/assemble simple creatives yourself \u2022 Use AI tools in daily work: generating and testing creatives, ad copywriting, data/reporting analysis, automating routine tasks \u2022 Set up Conversions API, Meta Pixel, UTM tracking, and CRM integrations \u2022 Communicate with clients in English on campaign results and strategy Requirements\u2022 English \u2014 Upper-Intermediate (B2) or above, written and spoken: our clients are English-speaking \u2022 2+ years of hands-on Meta Ads experience (agency experience is a strong plus) \u2022 Proven track record in lead generation \u2022 Solid understanding and practical use of CPL / CQL / CAC / CTR / CPM \u2022 Experience managing several ad accounts at once \u2022 Required: hands-on experience with AI tools (ChatGPT/Claude or similar \u2014 for creatives, copywriting, analysis, automation) \u2022 Required: design skills \u2014 comfortable with Canva/Figma/Photoshop, good visual sense, able to touch up a creative yourself or give clear feedback to a designer \u2022 Self-driven: you test hypotheses on your own rather than waiting for instructions on every step Nice to have\u2022 Google Ads / TikTok Ads \u2022 Experience with CRM tools (GoHighLevel or similar), GTM/GA4 \u2022 A portfolio with case studies (budget \u2192 leads \u2192 CPL) Terms\u2022 Format: full-time, remote \u2022 Rate: $1,200/month + KPI bonuses based on results \u2022 Employment type and payment method \u2014 discussed individually",
+      "companyName": "SF Marketing Agency",
+      "companySlug": "sf-marketing-agency",
+      "companyLogo": "https://cdn-images.himalayas.app/nbkqxjk7tpt4isow72ufcrqz057m",
+      "employmentType": "Full Time",
+      "minSalary": 1100,
+      "maxSalary": 1200,
+      "salaryPeriod": "monthly",
+      "seniority": ["Mid-level"],
+      "currency": "USD",
+      "locationRestrictions": [],
+      "timezoneRestrictions": [
+        -11, -10, -9.5, -9, -8, -7, -6, -5, -4, -3.5, -3, -2, -1, 0, 1, 2, 3, 3.5, 4, 4.5, 5, 5.5,
+        5.75, 6, 6.5, 7, 8, 8.75, 9, 9.5, 10, 10.5, 11, 12, 12.75, 13, 14
+      ],
+      "categories": [
+        "Meta-Ads-Specialist",
+        "Meta-Advertising-Specialist",
+        "Meta-Ads-Media-Buyer",
+        "Meta-PPC-Specialist",
+        "Meta-Ads-Manager"
+      ],
+      "parentCategories": [],
+      "description": "<h2><span><strong>What you'll do</strong></span></h2><ul class=\"list-disc list-outside leading-3 -mt-2\">\n<li class=\"leading-normal -mb-2\"><p><span>Set up and launch Meta Ads (Facebook/Instagram) campaigns for agency clients</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Daily monitoring of ad accounts: budgets, statuses, flags/bans, account health checks</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Manage and optimize live campaigns \u2014 testing audiences, offers, and creatives</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Run multiple client accounts simultaneously</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Report and analyze performance metrics: CPL, CQL, CAC, CTR, CPM</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Brief designers/copywriters on creatives, and independently edit/assemble simple creatives yourself</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Use AI tools in daily work: generating and testing creatives, ad copywriting, data/reporting analysis, automating routine tasks</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Set up Conversions API, Meta Pixel, UTM tracking, and CRM integrations</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Communicate with clients in English on campaign results and strategy</span></p></li>\n</ul><h2><span><strong>Requirements</strong></span></h2><ul class=\"list-disc list-outside leading-3 -mt-2\">\n<li class=\"leading-normal -mb-2\"><p><span>English \u2014 Upper-Intermediate (B2) or above, written and spoken: our clients are English-speaking</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>2+ years of hands-on Meta Ads experience (agency experience is a strong plus)</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Proven track record in lead generation</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Solid understanding and practical use of CPL / CQL / CAC / CTR / CPM</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Experience managing several ad accounts at once</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Required: hands-on experience with AI tools (ChatGPT/Claude or similar \u2014 for creatives, copywriting, analysis, automation)</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Required: design skills \u2014 comfortable with Canva/Figma/Photoshop, good visual sense, able to touch up a creative yourself or give clear feedback to a designer</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Self-driven: you test hypotheses on your own rather than waiting for instructions on every step</span></p></li>\n</ul><h2><span><strong>Nice to have</strong></span></h2><ul class=\"list-disc list-outside leading-3 -mt-2\">\n<li class=\"leading-normal -mb-2\"><p><span>Google Ads / TikTok Ads</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Experience with CRM tools (GoHighLevel or similar), GTM/GA4</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>A portfolio with case studies (budget \u2192 leads \u2192 CPL)</span></p></li>\n</ul><h2><span><strong>Terms</strong></span></h2><ul class=\"list-disc list-outside leading-3 -mt-2\">\n<li class=\"leading-normal -mb-2\"><p><span>Format: full-time, remote</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Rate: $1,200/month + KPI bonuses based on results</span></p></li>\n<li class=\"leading-normal -mb-2\"><p><span>Employment type and payment method \u2014 discussed individually</span></p></li>\n</ul><p>Originally posted on <a href=\"https://himalayas.app\">Himalayas</a></p>",
+      "pubDate": 1790584284,
+      "expiryDate": 1792823122,
+      "applicationLink": "https://himalayas.app/companies/sf-marketing-agency/jobs/meta-ads-targetologist-traffic-manager",
+      "guid": "https://himalayas.app/companies/sf-marketing-agency/jobs/meta-ads-targetologist-traffic-manager"
+    },
+    {
+      "title": "Mobile Application Developer - AI Neobank App",
+      "excerpt": "About DoitWe are focused on reinventing how people spend, save, invest, exchange, travel, and more.",
+      "companyName": "Bjak",
+      "companySlug": "bjak",
+      "companyLogo": "https://cdn-images.himalayas.app/8ub8wtihrfrm3vfivlkcojai4np3",
+      "employmentType": "Full Time",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": ["Mid-level"],
+      "currency": null,
+      "locationRestrictions": ["Ireland"],
+      "timezoneRestrictions": [1],
+      "categories": [
+        "Mobile-AI-Developer",
+        "AI-Application-Developer",
+        "Mobile-AI-Development",
+        "Mobile-Application-Developer",
+        "AI-Application-Development",
+        "AI-ML-Application-Developer",
+        "Mobile-Apps-Development"
+      ],
+      "parentCategories": [],
+      "description": "<h3><strong>About Doit</strong></h3><p>We are focused on reinventing how people spend, save, invest, exchange, travel, and more. Our objective is to build tools that will help people get more from their money and become an expert at ease. We believe AI will help make finance smart, assessible and safe.   </p><p>We are looking for the most talented and driven people we can find. We are looking for people who work for their passion, not counting hours. Who loves building great next-generation products, not status quo. Who cares about redefining how everyone around us can get the best financial applications, not for an exclusive few. We have teams working around the world, with over 20 nationalities and growing from our offices and remotely. Join us and build a better future for our society.  </p><p><em>In 2019, we built the first mobile-first, insurance platform, enabling insurance to be accessible online by millions in the region. Today, it's the leading insurance platform in Southeast Asia.</em></p><h3><strong>The Role</strong></h3><p>We are looking for Android engineers to build the native Android experience for Doit's AI Neobank App.<br><br>This role is for someone who cares about clean user flows, fast performance, product quality and shipping reliable mobile features used by real customers.</p><h3><strong>What You'll Own</strong></h3><ul>\n<li><p>Build and ship Android features using Kotlin.</p></li>\n<li><p>Create clean mobile flows for insurance, payments, claims, renewals and financial services.</p></li>\n<li><p>Work with product and design to simplify complex user journeys.</p></li>\n<li><p>Integrate backend APIs and ensure mobile flows are stable, secure and reliable.</p></li>\n<li><p>Improve app performance, crash rate, loading states, responsiveness and memory usage.</p></li>\n<li><p>Use analytics, user behaviour and production issues to improve the product.</p></li>\n<li><p>Build AI-assisted mobile experiences only where they genuinely improve the user journey.</p></li>\n</ul><h3><strong>What We're Looking For</strong></h3><ul>\n<li><p>3+ years of Android development experience using Kotlin.</p></li>\n<li><p>Strong Android fundamentals and experience shipping production apps.</p></li>\n<li><p>Good knowledge of Jetpack, Coroutines, Flow and modern Android architecture.</p></li>\n<li><p>Strong sense of mobile UX, usability, edge cases and user flows.</p></li>\n<li><p>Experience integrating REST APIs and debugging production issues.</p></li>\n<li><p>Fast execution, high ownership and strong attention to product quality.</p></li>\n<li><p>App links, GitHub, screenshots or examples of shipped work are a strong advantage.</p></li>\n</ul><h3><strong>Tech Stack</strong></h3><ul>\n<li><h3>Kotlin</h3></li>\n<li><h3>Jetpack Compose</h3></li>\n<li><h3>Android SDK</h3></li>\n<li><h3>Coroutines &amp; Flow</h3></li>\n<li><h3>SQL / NoSQL</h3></li>\n<li><h3>TensorFlow Lite (on-device inference)</h3></li>\n</ul><h3><strong>The Kind of Builder We Want</strong></h3><ul>\n<li><p>Thinks in user journeys, not just screens.</p></li>\n<li><p>Cares about making complex financial products feel simple.</p></li>\n<li><h3>Moves fast without creating messy code.</h3></li>\n<li><p>Notices UX, performance and reliability issues before users complain.</p></li>\n<li><p>Honest about what they personally built, what was team-owned and what impact they can or cannot claim.</p></li>\n</ul><h3><strong>This Role Is Not For</strong></h3><ul>\n<li><p>Engineers who only want fully defined tickets.</p></li>\n<li><p>Developers who build screens without caring about user experience.</p></li>\n<li><p>People who ignore crashes, edge cases, loading states or performance.</p></li>\n<li><p>Engineers who move slowly in a startup environment.</p></li>\n<li><p>People who exaggerate impact without explaining their actual contribution.</p></li>\n</ul><h3><strong>Location</strong></h3><p>This role is remote, but candidates must be based in <strong>Ireland</strong>. We are hiring specifically for this market, so applicants should already be based in <strong>Ireland</strong>.</p><h3><strong>Language</strong></h3><p>English is our main working language across global teams. Strong English communication is required.</p><h3><strong>Interview Process</strong></h3><h3>Our process is designed to move fast:</h3><ol>\n<li><h3>Online assessment or practical task</h3></li>\n<li><h3>Role-specific interview</h3></li>\n<li><h3>CEO / final round</h3></li>\n</ol><p>For strong candidates, we aim to complete the process and make an offer within 1 week from the start of the interview process. Candidates who complete assessments quickly will be prioritized.</p><p>Originally posted on <a href=\"https://himalayas.app\">Himalayas</a></p>",
+      "pubDate": 1790571697,
+      "expiryDate": 1795755696,
+      "applicationLink": "https://himalayas.app/companies/bjak/jobs/mobile-application-developer-ai-neobank-app-7461560433",
+      "guid": "https://himalayas.app/companies/bjak/jobs/mobile-application-developer-ai-neobank-app-7461560433"
+    },
+    {
+      "title": "Product Lead - AI Neobank App",
+      "excerpt": "About BJAKThe original mission of BJAK is we believe people deserve smarter ways to plan, save and grow their money.",
+      "companyName": "Bjak",
+      "companySlug": "bjak",
+      "companyLogo": "https://cdn-images.himalayas.app/8ub8wtihrfrm3vfivlkcojai4np3",
+      "employmentType": "Full Time",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": ["Manager", "Director"],
+      "currency": null,
+      "locationRestrictions": ["Spain"],
+      "timezoneRestrictions": [0, 1],
+      "categories": [
+        "AI-Product-Lead",
+        "AI-Product-Manager-Lead",
+        "Banking-Product-Manager",
+        "Fintech-Product-Lead",
+        "Senior-AI-Product-Lead",
+        "Head-Of-AI-Product",
+        "Team-Lead-AI-Products",
+        "Product-Lead"
+      ],
+      "parentCategories": ["Product"],
+      "description": "<h3>About BJAK</h3><p>The original mission of BJAK is we believe people deserve smarter ways to plan, save and grow their money. This is the origin of our name.<br><br>Started in 2019, we built the first mobile-first, insurance platform, enabling insurance to be accessible online by millions in the region. Today, its the leading insurance platform in Southeast Asia.<br><br>Today, we are expanding ways to help people in the region \u2014 this includes spending, saving, investing, exchanging, travelling, and more. Our mission is help people get more from their money every day.<br><br>We have teams working around the world, with over 20 nationalities from our offices and remotely, who truly enjoys their work. We are looking for the most talented and driven people we can find. We are looking for people who work for their passion, not counting hours. Who loves building great next-generation products, not status quo. Who cares about redefining how everyone around us can get the best financial applications, not for an exclusive few.<br><br>If you're this person, we'd love to talk to you.</p><h3><strong>The Role</strong></h3><p>We are looking for product leads to shape and drive major product areas within BJAK's AI Neobank app.<br><br>This role is for senior product builders who can own direction, execution, product quality and outcomes across multiple workstreams or squads.</p><h3><strong>What You'll Own</strong></h3><ul>\n<li><p>Lead product direction for major AI Neobank app areas.</p></li>\n<li><p>Define priorities, roadmap, product standards and success metrics across multiple features or squads.</p></li>\n<li><p>Guide PMs, Product Owners, designers and engineers toward clear execution.</p></li>\n<li><p>Work across insurance, payments, savings, investing, travel and other financial services.</p></li>\n<li><p>Turn regulatory, operational and business constraints into practical product decisions.</p></li>\n<li><p>Drive launch quality, post-launch learning and continuous improvement.</p></li>\n<li><p>Help build a product culture focused on speed, clarity, user value and honest measurement.</p></li>\n</ul><h3>\n<br><strong>What We're Looking For</strong>\n</h3><ul>\n<li><p>Strong experience leading digital product areas, not just individual features.</p></li>\n<li><p>Able to balance strategy, execution, UX, data, engineering and business outcomes.</p></li>\n<li><p>Strong judgement on prioritization, trade-offs and product sequencing.</p></li>\n<li><p>Experience leading or mentoring PMs / POs / cross-functional squads is a strong advantage.</p></li>\n<li><p>Comfortable with high ambiguity, fast changes and senior stakeholder pressure.</p></li>\n<li><p>Able to simplify complex financial products into usable journeys.</p></li>\n<li><p>Experience in fintech, insurance, payments, consumer apps or regulated products is a strong advantage.</p></li>\n</ul><h3>\n<br><strong>The Kind of Builder We Want</strong>\n</h3><ul>\n<li><p>Can set direction and still go deep into details.</p></li>\n<li><p>Pushes teams to move faster without lowering product quality.</p></li>\n<li><p>Knows when to simplify, when to scale and when to say no.</p></li>\n<li><p>Can lead through clarity, not bureaucracy.</p></li>\n<li><p>Avoids false claims and understands that product impact usually comes from many iterations and teams.</p></li>\n</ul><h3>\n<br><strong>This Role Is Not For</strong>\n</h3><ul>\n<li><p>Product leaders who only manage people and meetings.</p></li>\n<li><p>People who cannot go deep into product details.</p></li>\n<li><p>Candidates who are too slow for a high-growth environment.</p></li>\n<li><p>Leaders who push vanity metrics without understanding real user impact.</p></li>\n<li><p>People who need large teams before they can create progress.</p></li>\n</ul><h3>\n<br><strong>Location</strong>\n</h3><p>This role is remote, but candidates must be based in <strong>Spain</strong>. We are hiring specifically for this market, so applicants should already be based in <strong>Spain</strong>.</p><h3><strong>Language</strong></h3><p>English is our main working language across global teams. Strong English communication is required.</p><h3><strong>Interview Process</strong></h3><h3>Our process is designed to move fast:</h3><h3>1. Online assessment or practical task</h3><h3>2. Role-specific interview</h3><h3>3. CEO / final round</h3><p>For strong candidates, we aim to complete the process and make an offer within 1 week from the start of the interview process. Candidates who complete assessments quickly will be prioritized.</p><p>Originally posted on <a href=\"https://himalayas.app\">Himalayas</a></p>",
+      "pubDate": 1790571628,
+      "expiryDate": 1795755627,
+      "applicationLink": "https://himalayas.app/companies/bjak/jobs/product-lead-ai-neobank-app-833162000",
+      "guid": "https://himalayas.app/companies/bjak/jobs/product-lead-ai-neobank-app-833162000"
+    }
+  ]
+}
